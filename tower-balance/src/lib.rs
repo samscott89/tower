@@ -157,7 +157,7 @@ where
     ///
     /// Removals may alter the order of either `ready` or `not_ready`.
     fn update_from_discover(&mut self) -> Result<(), error::Balance> {
-        debug!("updating from discover; ready={}; not_ready={}", self.num_ready(); self.num_not_ready());
+        debug!("updating from discover; ready={}; not_ready={}", self.num_ready(), self.num_not_ready());
         use tower_discover::Change::*;
 
         while let Async::Ready(change) =
@@ -190,7 +190,7 @@ where
                 }
             }
         }
-        trace!(" -> done; ready={}; not_ready={}", self.num_ready(); self.num_not_ready());
+        trace!(" -> done; ready={}; not_ready={}", self.num_ready(), self.num_not_ready());
         Ok(())
     }
 
@@ -337,7 +337,7 @@ where
     }
 
     fn call(&mut self, request: Request) -> Self::Future {
-        trace!("Balance::call: ready={}; not_ready={}", self.num_ready(), self.num_not_ready());
+        debug!("Balance::call: ready={}; not_ready={}", self.num_ready(), self.num_not_ready());
         let idx = self.chosen_ready_index.take().expect("not ready");
         let (_, svc) = self
             .ready
