@@ -168,7 +168,7 @@ where
                     // If the `Insert`ed service is a duplicate of a service already
                     // in the ready list, remove the ready service first. The new
                     // service will then be inserted into the not-ready list.
-                    trace!("-> insert {:?}; replaced={:?};", key, self.ready.remove(&key).is_some());
+                    trace!("-> insert; replaced={:?};", self.ready.remove(&key).is_some());
 
                     self.not_ready.insert(key, svc);
                 }
@@ -176,11 +176,11 @@ where
                 Remove(key) => {
                     let _ejected = match self.ready.remove(&key) {
                         None => {
-                            trace!("-> remove not_ready[{:?}]", key);
+                            trace!("-> remove not_ready svc");
                             self.not_ready.remove(&key)
                         },
                         Some(s) => {
-                            trace!("-> remove ready[{:?}]", key);
+                            trace!("-> remove ready svc");
                             Some(s)
                         },
                     };
