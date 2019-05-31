@@ -157,7 +157,7 @@ where
     ///
     /// Removals may alter the order of either `ready` or `not_ready`.
     fn update_from_discover(&mut self) -> Result<(), error::Balance> {
-        debug!("updating from discover");
+        debug!("updating from discover; ready={}; not_ready={}", self.num_ready(); self.num_not_ready());
         use tower_discover::Change::*;
 
         while let Async::Ready(change) =
@@ -175,8 +175,14 @@ where
 
                 Remove(key) => {
                     let _ejected = match self.ready.remove(&key) {
-                        None => self.not_ready.remove(&key),
-                        Some(s) => Some(s),
+                        None => {
+                            trace!("-> remove not ready svc")
+                            self.not_ready.remove(&key);
+                        },
+                        Some(s) => {
+                            trace!("-> remove ready svc")
+                            Some(s)
+                        },
                     };
                     // XXX is it safe to just drop the Service? Or do we need some sort of
                     // graceful teardown?
@@ -184,7 +190,7 @@ where
                 }
             }
         }
-
+        trace!(" -> done; ready={}; not_ready={}", self.num_ready(); self.num_not_ready());
         Ok(())
     }
 
@@ -331,6 +337,7 @@ where
     }
 
     fn call(&mut self, request: Request) -> Self::Future {
+        trace!("Balance::call: ready={}; not_ready={}", self.num_ready(), self.num_not_ready());
         let idx = self.chosen_ready_index.take().expect("not ready");
         let (_, svc) = self
             .ready
